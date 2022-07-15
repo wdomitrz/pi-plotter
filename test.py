@@ -3,38 +3,36 @@ import time
 from time import sleep
 
 from gpiozero import OutputDevice as stepper
-# from gpiozero import Servo
+from gpiozero import Servo
 
-# # class Servo1:
-# #     IN = 17
+# class Servo1:
+#     IN = 17
 
-# servoGPIO = 17
+servoGPIO = 17
 
-# servo = Servo(servoGPIO)
+servo = Servo(servoGPIO)
 
-# while True:
+while True:
 
-#     servo.min()
-#     servo.mid()
-#     print("mid")
-#     sleep(0.5)
-#     servo.max()
-#     print("max")
-#     sleep(1)
-#     servo.min()
+    servo.min()
+    print("min")
+    sleep(1)
+    servo.max()
+    print("max")
+    sleep(1)
 
 
 # 1
-R_IN1 = stepper(14)
-R_IN2 = stepper(15)
-R_IN3 = stepper(18)
-R_IN4 = stepper(23)
+# R_IN1 = stepper(14)
+# R_IN2 = stepper(15)
+# R_IN3 = stepper(18)
+# R_IN4 = stepper(23)
 
-# 2
-L_IN1 = stepper(24)
-L_IN2 = stepper(25)
-L_IN3 = stepper(8)
-L_IN4 = stepper(7)
+# # 2
+# L_IN1 = stepper(24)
+# L_IN2 = stepper(25)
+# L_IN3 = stepper(8)
+# L_IN4 = stepper(7)
 
 
 # IN1, IN2, IN3, IN4 = L_IN1, L_IN2, L_IN3, L_IN4
