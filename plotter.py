@@ -9,8 +9,9 @@ from gpiozero import Servo
 
 
 class PenUpDown:
-    def __init__(self, *, pin=17, start_up=False, start_down=False):
+    def __init__(self, *, pin=17, start_up=False, start_down=False, delay=0.2):
         self.pin = pin
+        self.delay = delay
         self.servo = Servo(self.pin)
         assert(not(start_up and start_down)
                ), "Pen cannot start both up and down"
@@ -24,9 +25,11 @@ class PenUpDown:
 
     def up(self):
         self.servo.max()
+        time.sleep(self.delay)
 
     def down(self):
         self.servo.min()
+        time.sleep(self.delay)
 
 
 class Motor:
@@ -117,12 +120,13 @@ def get_height_of_a_triange_to_the_first_edge(*, edges_lengths):
 
 
 class PenController:
-    def __init__(self, *, motors: CombinedMotors, cm_to_steps_scale=500,
+    def __init__(self, *, motors: CombinedMotors, pen_up_down=None, cm_to_steps_scale=500,
                  initial_strings_len_cm=(20, 20), distance_between_motors_cm=40.5, distance_between_mounting_points_cm=7.5, time_mult=1, speed_mult=1):
         """
         cm_to_steps_scale=500 means that 500 steps is ~1cm
         """
         self.motors = motors
+        self.pen_up_down = pen_up_down
         self.speed_mult = speed_mult
         self.time_mult = time_mult
         self.cm_to_steps_scale = cm_to_steps_scale / speed_mult
@@ -216,6 +220,7 @@ class PenController:
                 if step_number * abs(total_steps_number) / \
                         number_of_steps >= number_of_done_steps[i]:
                     step.append(1)
+                    number_of_done_steps[i] += 1
                 else:
                     step.append(0)
                 if total_steps_number < 0:
@@ -244,5 +249,11 @@ class PenController:
 
     def go_to_cm(self, position_cm):
         target_x_cm, target_y_cm = position_cm
+
+    def pen_down(self):
+        self.pen_up_down.down()
+
+    def pen_up(self):
+        self.pen_up_down.up()
 
 # %%
