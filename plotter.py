@@ -65,6 +65,9 @@ class Motor:
         step = -1 if self.inverted else 1
         step *= multiplier
 
+        if step == 0:
+            return
+
         self.current_position += step
         self.current_position %= len(self.move_sequence)
 
@@ -82,7 +85,7 @@ class DefaultRightMotor(Motor):
 
 
 class CombinedMotors:
-    def __init__(self, *, left=None, right=None, delay=0.003):
+    def __init__(self, *, left=None, right=None, delay=0.002):
         self.left = left if left is not None else DefaultLeftMotor()
         self.right = right if right is not None else DefaultRightMotor()
         self.delay = delay
@@ -214,24 +217,16 @@ class PenController:
         strings_len_difference_steps = tuple(
             map(self.mm_to_steps, strings_len_difference_mm))
 
-        number_of_steps = max(map(abs, strings_len_difference_steps))
-        number_of_done_steps = [
-            0 for _ in range(
-                len(strings_len_difference_steps))]
-        steps = []
-        for step_number in range(number_of_steps):
-            step = []
-            for i, total_steps_number in enumerate(
-                    strings_len_difference_steps):
-                if step_number * abs(total_steps_number) / \
-                        number_of_steps >= number_of_done_steps[i]:
-                    step.append(1)
-                    number_of_done_steps[i] += 1
-                else:
-                    step.append(0)
-                if total_steps_number < 0:
-                    step[i] *= -1
-            steps.append(tuple(step))
+        step_signs = tuple(
+            map(lambda x: int(math.copysign(1, x)), strings_len_difference_steps))
+        strings_len_difference_steps = tuple(
+            map(abs, strings_len_difference_steps))
+        number_of_steps = max(*strings_len_difference_steps)
+
+        steps = [[0 for _ in step_signs] for _ in range(number_of_steps)]
+        for i, (sign, step_size) in enumerate(zip(step_signs, strings_len_difference_steps)):
+            for step_number in range(0, step_size):
+                steps[step_number * number_of_steps // step_size + (number_of_steps // (2 * step_size))][i] += sign
 
         self.execute_steps(steps=steps)
 
@@ -243,6 +238,7 @@ class PenController:
             steps=steps,
             speed_mult=self.speed_mult,
             time_mult=self.time_mult)
+        time.sleep(self.motors.delay * 5)
 
     def set_current_position(self, *, strings_len_mm=None, position_mm=None):
         assert(not(strings_len_mm is None and position_mm is None)

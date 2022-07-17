@@ -3,7 +3,7 @@ from plotter import PenController, PenUpDown
 
 
 def main():
-    commands = gcode_parser.parse("test.gcode")
+    commands = gcode_parser.parse("asd.gcode")
     pen_controller = PenController(pen_up_down=PenUpDown())
     for command in commands:
         if command["command"] == "pen_down":
