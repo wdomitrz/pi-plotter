@@ -119,93 +119,93 @@ def get_height_of_a_triange_to_the_first_edge(*, edges_lengths):
 
 
 class PenController:
-    def __init__(self, *, motors: CombinedMotors, pen_up_down=None, cm_to_steps_scale=500,
-                 initial_strings_len_cm=(20, 20), distance_between_motors_cm=40.5, distance_between_mounting_points_cm=7.5, time_mult=1, speed_mult=1):
+    def __init__(self, *, motors: CombinedMotors, pen_up_down=None, mm_to_steps_scale=50,
+                 initial_strings_len_mm=(200, 200), distance_between_motors_mm=405, distance_between_mounting_points_mm=75, time_mult=1, speed_mult=1):
         """
-        cm_to_steps_scale=500 means that 500 steps is ~1cm
+        mm_to_steps_scale=50 means that 50 steps is ~1mm
         """
         self.motors = motors
         self.pen_up_down = pen_up_down
         self.speed_mult = speed_mult
         self.time_mult = time_mult
-        self.cm_to_steps_scale = cm_to_steps_scale / speed_mult
-        self.distance_between_motors_cm = distance_between_motors_cm
-        self.initial_strings_len_cm = initial_strings_len_cm
-        self.distance_between_mounting_points_cm = distance_between_mounting_points_cm
+        self.mm_to_steps_scale = mm_to_steps_scale / speed_mult
+        self.distance_between_motors_mm = distance_between_motors_mm
+        self.initial_strings_len_mm = initial_strings_len_mm
+        self.distance_between_mounting_points_mm = distance_between_mounting_points_mm
         self.initial_height = get_height_of_a_triange_to_the_first_edge(
             edges_lengths=[
-                self.distance_between_motors_cm -
-                self.distance_between_mounting_points_cm,
+                self.distance_between_motors_mm -
+                self.distance_between_mounting_points_mm,
                 *
-                self.initial_strings_len_cm])
-        self.current_strings_len_cm = self.initial_strings_len_cm
-        self.current_position_cm = self.strings_to_position_cm(
-            strings_len_cm=self.current_strings_len_cm)
+                self.initial_strings_len_mm])
+        self.current_strings_len_mm = self.initial_strings_len_mm
+        self.current_position_mm = self.strings_to_position_mm(
+            strings_len_mm=self.current_strings_len_mm)
 
-    def cm_to_steps(self, n):
-        return int(n * self.cm_to_steps_scale)
+    def mm_to_steps(self, n):
+        return int(n * self.mm_to_steps_scale)
 
-    def steps_to_cm(self, n):
-        return n / self.cm_to_steps_scale
+    def steps_to_mm(self, n):
+        return n / self.mm_to_steps_scale
 
-    def strings_to_position_cm(self, *, strings_len_cm):
+    def strings_to_position_mm(self, *, strings_len_mm):
         # We calculate a height of a triangle using its area
-        height_cm = get_height_of_a_triange_to_the_first_edge(
+        height_mm = get_height_of_a_triange_to_the_first_edge(
             edges_lengths=[
-                self.distance_between_motors_cm -
-                self.distance_between_mounting_points_cm,
+                self.distance_between_motors_mm -
+                self.distance_between_mounting_points_mm,
                 *
-                strings_len_cm])
-        position_y_cm = height_cm - self.initial_height
-        position_x_cm = (
-            self.distance_between_motors_cm - self.distance_between_mounting_points_cm) / 2 - math.sqrt(
-            strings_len_cm[0]**2 - height_cm**2)
-        return position_x_cm, position_y_cm
+                strings_len_mm])
+        position_y_mm = height_mm - self.initial_height
+        position_x_mm = (
+            self.distance_between_motors_mm - self.distance_between_mounting_points_mm) / 2 - math.sqrt(
+            strings_len_mm[0]**2 - height_mm**2)
+        return position_x_mm, position_y_mm
 
-    def position_to_strings_cm(self, *, position_cm):
-        position_x_cm, position_y_cm = position_cm
+    def position_to_strings_mm(self, *, position_mm):
+        position_x_mm, position_y_mm = position_mm
 
-        left_triangle_upper_edge_len_cm = (
-            self.distance_between_motors_cm - self.distance_between_mounting_points_cm) / 2 + position_x_cm
+        left_triangle_upper_edge_len_mm = (
+            self.distance_between_motors_mm - self.distance_between_mounting_points_mm) / 2 + position_x_mm
 
-        right_triangle_upper_edge_len_cm = (
-            self.distance_between_motors_cm - self.distance_between_mounting_points_cm) / 2 - position_x_cm
+        right_triangle_upper_edge_len_mm = (
+            self.distance_between_motors_mm - self.distance_between_mounting_points_mm) / 2 - position_x_mm
 
-        height_cm = position_y_cm + self.initial_height
+        height_mm = position_y_mm + self.initial_height
 
         strings_lengths = tuple(
             math.sqrt(
-                upper_edge_len_cm ** 2 + height_cm ** 2) for upper_edge_len_cm in (
-                left_triangle_upper_edge_len_cm,
-                right_triangle_upper_edge_len_cm))
+                upper_edge_len_mm ** 2 + height_mm ** 2) for upper_edge_len_mm in (
+                left_triangle_upper_edge_len_mm,
+                right_triangle_upper_edge_len_mm))
 
         return strings_lengths
 
-    def relative_line_cm(self, *, goal_position_cm):
-        absolute_goal_position_cm = tuple(
+    def relative_line_mm(self, *, goal_position_mm):
+        absolute_goal_position_mm = tuple(
             current_pos +
             relative_pos for current_pos,
             relative_pos in zip(
-                self.current_position_cm,
-                goal_position_cm))
-        return self.absolute_line_cm(
-            goal_position_cm=absolute_goal_position_cm)
+                self.current_position_mm,
+                goal_position_mm))
+        return self.absolute_line_mm(
+            goal_position_mm=absolute_goal_position_mm)
 
-    def absolute_line_cm(self, *, goal_position_cm):
-        goal_strings_len_cm = self.position_to_strings_cm(
-            position_cm=goal_position_cm)
+    def absolute_line_mm(self, *, goal_position_mm):
+        goal_strings_len_mm = self.position_to_strings_mm(
+            position_mm=goal_position_mm)
 
-        return self.move_to_strings_position_cm(
-            goal_strings_len_cm=goal_strings_len_cm, goal_position_cm=goal_position_cm)
+        return self.move_to_strings_position_mm(
+            goal_strings_len_mm=goal_strings_len_mm, goal_position_mm=goal_position_mm)
 
-    def move_to_strings_position_cm(
-            self, *, goal_strings_len_cm, goal_position_cm=None):
+    def move_to_strings_position_mm(
+            self, *, goal_strings_len_mm, goal_position_mm=None):
 
-        strings_len_difference_cm = tuple(map(
+        strings_len_difference_mm = tuple(map(
             lambda current_goal: current_goal[1] - current_goal[0], zip(
-                self.current_strings_len_cm, goal_strings_len_cm)))
+                self.current_strings_len_mm, goal_strings_len_mm)))
         strings_len_difference_steps = tuple(
-            map(self.cm_to_steps, strings_len_difference_cm))
+            map(self.mm_to_steps, strings_len_difference_mm))
 
         number_of_steps = max(map(abs, strings_len_difference_steps))
         number_of_done_steps = [
@@ -229,7 +229,7 @@ class PenController:
         self.execute_steps(steps=steps)
 
         return self.set_current_position(
-            strings_len_cm=goal_strings_len_cm, position_cm=goal_position_cm)
+            strings_len_mm=goal_strings_len_mm, position_mm=goal_position_mm)
 
     def execute_steps(self, *, steps):
         self.motors.go(
@@ -237,17 +237,17 @@ class PenController:
             speed_mult=self.speed_mult,
             time_mult=self.time_mult)
 
-    def set_current_position(self, *, strings_len_cm=None, position_cm=None):
-        assert(not(strings_len_cm is None and position_cm is None)
+    def set_current_position(self, *, strings_len_mm=None, position_mm=None):
+        assert(not(strings_len_mm is None and position_mm is None)
                ), "Position has to be specified by at least strings length or Cartesian coordinates"
 
-        self.current_strings_len_cm = strings_len_cm if strings_len_cm is not None else self.position_to_strings_cm(
-            position_cm=position_cm)
-        self.current_position_cm = position_cm if position_cm is not None else self.strings_to_position_cm(
-            strings_len_cm=strings_len_cm)
+        self.current_strings_len_mm = strings_len_mm if strings_len_mm is not None else self.position_to_strings_mm(
+            position_mm=position_mm)
+        self.current_position_mm = position_mm if position_mm is not None else self.strings_to_position_mm(
+            strings_len_mm=strings_len_mm)
 
-    def go_to_cm(self, position_cm):
-        target_x_cm, target_y_cm = position_cm
+    def go_to_mm(self, position_mm):
+        target_x_mm, target_y_mm = position_mm
 
     def pen_down(self):
         self.pen_up_down.down()
