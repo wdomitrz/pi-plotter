@@ -72,12 +72,12 @@ class Motor:
 
 
 class DefaultLeftMotor(Motor):
-    def __init__(self, pins=[24, 25, 8, 7], inverted=False):
+    def __init__(self, pins=[24, 25, 8, 7], inverted=True):
         super().__init__(pins=pins, inverted=inverted)
 
 
 class DefaultRightMotor(Motor):
-    def __init__(self, pins=[14, 15, 18, 23], inverted=True):
+    def __init__(self, pins=[14, 15, 18, 23], inverted=False):
         super().__init__(pins=pins, inverted=inverted)
 
 
@@ -141,6 +141,10 @@ class PenController:
         self.current_strings_len_mm = self.initial_strings_len_mm
         self.current_position_mm = self.strings_to_position_mm(
             strings_len_mm=self.current_strings_len_mm)
+
+    def __del__(self):
+        self.pen_up()
+        self.absolute_line_mm(goal_position_mm=(0, 0))
 
     def mm_to_steps(self, n):
         return int(n * self.mm_to_steps_scale)

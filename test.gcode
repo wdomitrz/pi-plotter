@@ -10,7 +10,6 @@ G28 Y; home
 G28 Z; home
 G00 F300.0 Z21.000; pen park !!Zpark
 G00 F2400.0 Y0.000; !!Ybottom
-G00 F2400.0 X-150.000; !!Xleft
 G00 F2400.0 X-38.594 Y5.276; move !!Xleft+111.406 Ybottom+5.276
 G00 F300.0 Z1.000; pen down !!Zwork
 G01 F2100.0 X-29.464 Y5.276; draw !!Xleft+120.536 Ybottom+5.276

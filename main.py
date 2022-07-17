@@ -10,10 +10,13 @@ def main():
             pen_controller.pen_down()
         elif command["command"] == "pen_up":
             pen_controller.pen_up()
-        elif command["command"] == "absolute_move":
-            pen_controller.absolute_line_mm(command["X"], command["Y"])
-        elif command["command"] == "relative_move":
-            pen_controller.relative_line_mm(command["X"], command["Y"])
+        elif command["command"] in ["absolute_move", "relative_move"]:
+            pos_mm = (command["X"] if "X" in command else 0,
+                      command["Y"] if "Y" in command else 0)
+            if command["command"] == "absolute_move":
+                pen_controller.absolute_line_mm(goal_position_mm=pos_mm)
+            else:
+                pen_controller.relative_line_mm(goal_position_mm=pos_mm)
         else:
             raise RuntimeError(
                 f"Unknown command {command['command']} with params {command}")

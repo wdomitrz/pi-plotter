@@ -13,7 +13,7 @@ def parse(file_name):
     for line in lines:
         # Skip empty lines (and lines with only comments)
         if len(line) == 0:
-            pass
+            continue
 
         if line[0] in ["G00", "G01"]:
             # Move
