@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# %%
 
 import math
 import time
@@ -255,5 +254,3 @@ class PenController:
 
     def pen_up(self):
         self.pen_up_down.up()
-
-# %%
