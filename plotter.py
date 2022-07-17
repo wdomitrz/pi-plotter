@@ -82,9 +82,9 @@ class DefaultRightMotor(Motor):
 
 
 class CombinedMotors:
-    def __init__(self, *, left, right, delay=0.003):
-        self.left = left
-        self.right = right
+    def __init__(self, *, left=None, right=None, delay=0.003):
+        self.left = left if left is not None else DefaultLeftMotor()
+        self.right = right if right is not None else DefaultRightMotor()
         self.delay = delay
 
     def go(self, *, steps, speed_mult=1, time_mult=1):
@@ -119,12 +119,12 @@ def get_height_of_a_triange_to_the_first_edge(*, edges_lengths):
 
 
 class PenController:
-    def __init__(self, *, motors: CombinedMotors, pen_up_down=None, mm_to_steps_scale=50,
+    def __init__(self, *, motors=None, pen_up_down=None, mm_to_steps_scale=50,
                  initial_strings_len_mm=(200, 200), distance_between_motors_mm=405, distance_between_mounting_points_mm=75, time_mult=1, speed_mult=1):
         """
         mm_to_steps_scale=50 means that 50 steps is ~1mm
         """
-        self.motors = motors
+        self.motors = motors if motors is not None else CombinedMotors()
         self.pen_up_down = pen_up_down
         self.speed_mult = speed_mult
         self.time_mult = time_mult

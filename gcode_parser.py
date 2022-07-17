@@ -31,7 +31,7 @@ def parse(file_name):
                     if absolute_move:
                         new_command["command"] = "absolute_move"
                     else:
-                        new_command["command"] = "relative"
+                        new_command["command"] = "relative_move"
                     new_command[param[0]] = float(param[1:])
                 else:
                     raise RuntimeError(
