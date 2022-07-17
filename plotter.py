@@ -186,16 +186,19 @@ class PenController:
         return strings_lengths
 
     def relative_line_mm(self, *, goal_position_mm):
+        goal_position_mm = tuple(
+            relative_pos if relative_pos is not None else 0 for relative_pos in goal_position_mm)
         absolute_goal_position_mm = tuple(
-            current_pos +
-            relative_pos for current_pos,
-            relative_pos in zip(
-                self.current_position_mm,
-                goal_position_mm))
+            map(sum, zip(goal_position_mm, self.current_position_mm)))
         return self.absolute_line_mm(
             goal_position_mm=absolute_goal_position_mm)
 
     def absolute_line_mm(self, *, goal_position_mm):
+        goal_position_mm = tuple(
+            absolute_pos if absolute_pos is not None else current_pos for absolute_pos,
+            current_pos in zip(
+                goal_position_mm,
+                self.current_position_mm))
         goal_strings_len_mm = self.position_to_strings_mm(
             position_mm=goal_position_mm)
 
