@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# %%
 
 import math
 import time
@@ -57,7 +58,7 @@ class Motor:
             else:
                 input.off()
 
-    def step(self, *, multiplier=1):
+    def step(self, multiplier=1):
 
         step = -1 if self.inverted else 1
         step *= multiplier
@@ -79,7 +80,7 @@ class DefaultRightMotor(Motor):
 
 
 class CombinedMotors:
-    def __init__(self, *, left, right, delay=0.002):
+    def __init__(self, *, left, right, delay=0.003):
         self.left = left
         self.right = right
         self.delay = delay
@@ -136,7 +137,7 @@ class PenController:
                 self.initial_strings_len_cm])
         self.current_strings_len_cm = self.initial_strings_len_cm
         self.current_position_cm = self.strings_to_position_cm(
-            self.current_strings_len_cm)
+            strings_len_cm=self.current_strings_len_cm)
 
     def cm_to_steps(self, n):
         return int(n * self.cm_to_steps_scale)
@@ -161,27 +162,31 @@ class PenController:
     def position_to_strings_cm(self, *, position_cm):
         position_x_cm, position_y_cm = position_cm
 
-        left_triangle_upper_edge_len_cm = position_x_cm - \
-            self.distance_between_mounting_points_cm / \
-            2 - self.distance_between_motors_cm / 2
+        left_triangle_upper_edge_len_cm = (
+            self.distance_between_motors_cm - self.distance_between_mounting_points_cm) / 2 + position_x_cm
 
-        right_triangle_upper_edge_len_cm = self.distance_between_motors_cm / \
-            2 - position_x_cm - self.distance_between_mounting_points_cm / 2
+        right_triangle_upper_edge_len_cm = (
+            self.distance_between_motors_cm - self.distance_between_mounting_points_cm) / 2 - position_x_cm
 
         height_cm = position_y_cm + self.initial_height
 
-        strings_lengths = (
+        strings_lengths = tuple(
             math.sqrt(
-                upper_edge_len_cm ** 2 +
-                height_cm**2) for upper_edge_len_cm in [
+                upper_edge_len_cm ** 2 + height_cm ** 2) for upper_edge_len_cm in (
                 left_triangle_upper_edge_len_cm,
-                right_triangle_upper_edge_len_cm])
+                right_triangle_upper_edge_len_cm))
 
         return strings_lengths
 
     def relative_line_cm(self, *, goal_position_cm):
-        return self.absolute_line_cm(self, goal_position_cm=tuple(
-            map(sum(self.current_position_cm, goal_position_cm))))
+        absolute_goal_position_cm = tuple(
+            current_pos +
+            relative_pos for current_pos,
+            relative_pos in zip(
+                self.current_position_cm,
+                goal_position_cm))
+        return self.absolute_line_cm(
+            goal_position_cm=absolute_goal_position_cm)
 
     def absolute_line_cm(self, *, goal_position_cm):
         goal_strings_len_cm = self.position_to_strings_cm(
@@ -190,16 +195,16 @@ class PenController:
         return self.move_to_strings_position_cm(
             goal_strings_len_cm=goal_strings_len_cm, goal_position_cm=goal_position_cm)
 
-    def move_to_strings_position(
+    def move_to_strings_position_cm(
             self, *, goal_strings_len_cm, goal_position_cm=None):
 
-        strings_len_difference_cm = map(
+        strings_len_difference_cm = tuple(map(
             lambda current_goal: current_goal[1] - current_goal[0], zip(
-                self.goal_strings_len_cm, goal_strings_len_cm))
+                self.current_strings_len_cm, goal_strings_len_cm)))
         strings_len_difference_steps = tuple(
             map(self.cm_to_steps, strings_len_difference_cm))
 
-        number_of_steps = max(*map(abs, strings_len_difference_steps))
+        number_of_steps = max(map(abs, strings_len_difference_steps))
         number_of_done_steps = [
             0 for _ in range(
                 len(strings_len_difference_steps))]
@@ -208,21 +213,24 @@ class PenController:
             step = []
             for i, total_steps_number in enumerate(
                     strings_len_difference_steps):
-                step.append(0)
                 if step_number * abs(total_steps_number) / \
                         number_of_steps >= number_of_done_steps[i]:
-                    step[i] += 1
+                    step.append(1)
+                else:
+                    step.append(0)
                 if total_steps_number < 0:
                     step[i] *= -1
+            steps.append(tuple(step))
 
         self.execute_steps(steps=steps)
 
-        return self.set_current_position(goal_strings_len_cm, goal_position_cm)
+        return self.set_current_position(
+            strings_len_cm=goal_strings_len_cm, position_cm=goal_position_cm)
 
     def execute_steps(self, *, steps):
         self.motors.go(
             steps=steps,
-            speed_mult=self.spped_mult,
+            speed_mult=self.speed_mult,
             time_mult=self.time_mult)
 
     def set_current_position(self, *, strings_len_cm=None, position_cm=None):
@@ -236,3 +244,5 @@ class PenController:
 
     def go_to_cm(self, position_cm):
         target_x_cm, target_y_cm = position_cm
+
+# %%
