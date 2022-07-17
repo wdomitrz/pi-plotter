@@ -21,7 +21,7 @@ class PenUpDown:
             self.down()
 
     def __del__(self):
-        self.down()
+        self.up()
 
     def up(self):
         self.servo.max()
