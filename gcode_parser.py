@@ -1,3 +1,25 @@
+def parse_move_command(*, line, absolute_move):
+    new_command = {}
+    for param in line[1:]:
+        if param[0] in ["E", "F", "S"]:
+            # Ignore unsupported commands
+            pass
+        elif param[0] == "Z":
+            if float(param[1:]) < 1.5:
+                new_command["command"] = "pen_down"
+            else:
+                new_command["command"] = "pen_up"
+        elif param[0] in ["X", "Y"]:
+            if absolute_move:
+                new_command["command"] = "absolute_move"
+            else:
+                new_command["command"] = "relative_move"
+            new_command[param[0]] = float(param[1:])
+        else:
+            raise RuntimeError(f"Unsupported parameter {param} to command {line[0]}")
+    return new_command
+
+
 def parse(file_name):
     # Read lines
     with open(file_name, "r", encoding="utf-8") as gcode_file:
@@ -17,26 +39,7 @@ def parse(file_name):
 
         if line[0] in ["G00", "G01"]:
             # Move
-            new_command = {}
-            for param in line[1:]:
-                if param[0] in ["E", "F", "S"]:
-                    # Ignore unsupported commands
-                    pass
-                elif param[0] == "Z":
-                    if float(param[1:]) < 1.5:
-                        new_command["command"] = "pen_down"
-                    else:
-                        new_command["command"] = "pen_up"
-                elif param[0] in ["X", "Y"]:
-                    if absolute_move:
-                        new_command["command"] = "absolute_move"
-                    else:
-                        new_command["command"] = "relative_move"
-                    new_command[param[0]] = float(param[1:])
-                else:
-                    raise RuntimeError(
-                        f"Unsupported parameter {param} to command {line[0]}"
-                    )
+            new_command = parse_move_command(line=line, absolute_move=absolute_move)
             if "command" in new_command:
                 commands.append(new_command)
         elif line[0] in ["G91"]:

@@ -90,12 +90,15 @@ class CombinedMotors:
         self.delay = delay
 
     def run(self, *, steps, speed_multiplier=1, time_multiplier=1):
-        sleep_time = time_multiplier * self.delay
 
         for left_step, right_step in steps:
             self.left.step(multiplier=left_step * speed_multiplier)
             self.right.step(multiplier=right_step * speed_multiplier)
-            time.sleep(sleep_time)
+            self.sleep(time_multiplier)
+        self.sleep(time_multiplier)
+
+    def sleep(self, time_multiplier=1):
+        time.sleep(time_multiplier * self.delay)
 
 
 def get_area_of_a_triangle(*, edges_lengths):
@@ -124,7 +127,7 @@ def get_height_of_a_triangle_to_the_first_edge(*, edges_lengths):
     return height
 
 
-class PenController:
+class PenController:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         *,
