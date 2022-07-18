@@ -139,7 +139,7 @@ class PenController:  # pylint: disable=too-many-instance-attributes
         mm_to_steps_scale=50,
         initial_strings_len_mm=(200, 200),
         distance_between_motors_mm=405,
-        distance_between_mounting_points_mm=75,
+        distance_between_mounting_points_mm=62,
         time_multiplier=1,
         speed_multiplier=1
     ):
