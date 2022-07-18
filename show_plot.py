@@ -3,40 +3,34 @@ import matplotlib.pyplot as plt
 import gcode_parser
 
 
-def scatter(xs, ys):
-    plt.plot(xs, ys, ".-", color="black")
+def scatter(pos):
+    pos_x, pos_y = zip(*pos)
+    plt.plot(pos_x, pos_y, ".-", color="black")
 
 
 def main():
     commands = gcode_parser.parse("test.gcode")
-    xs = [0]
-    ys = [0]
+    pos = [(0, 0)]
     for command in commands:
         if command["command"] == "pen_down":
-            xs = [xs[-1]]
-            ys = [ys[-1]]
-            scatter(xs, ys)
+            pos = [pos[-1]]
         elif command["command"] == "pen_up":
-            scatter(xs, ys)
-            xs = [xs[-1]]
-            ys = [ys[-1]]
+            scatter(pos)
+            pos = [pos[-1]]
         elif command["command"] in ["absolute_move", "relative_move"]:
 
-            pos_mm = (
+            last_pos = (
                 command["X"] if "X" in command else 0,
                 command["Y"] if "Y" in command else 0,
             )
-            if command["command"] == "absolute_move":
-                xs.append(pos_mm[0])
-                ys.append(pos_mm[1])
-            else:
-                xs.append(pos_mm[0] + xs[-1])
-                ys.append(pos_mm[1] + ys[-1])
+            if command["command"] == "relative_move":
+                last_pos = tuple(map(sum, zip(last_pos, pos[-1])))
+            pos.append(last_pos)
         else:
             raise RuntimeError(
                 f"Unknown command {command['command']} with params {command}"
             )
-    scatter(xs, ys)
+    scatter(pos)
     plt.show()
 
 
