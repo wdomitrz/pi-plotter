@@ -14,18 +14,18 @@ class PenUpDown:
         self.servo = Servo(self.pin)
         assert not (start_up and start_down), "Pen cannot start both up and down"
         if start_up:
-            self.up()
+            self.pen_up()
         elif start_down:
-            self.down()
+            self.pen_down()
 
     def __del__(self):
-        self.up()
+        self.pen_up()
 
-    def up(self):
+    def pen_up(self):
         self.servo.max()
         time.sleep(self.delay)
 
-    def down(self):
+    def pen_down(self):
         self.servo.min()
         time.sleep(self.delay)
 
@@ -55,7 +55,7 @@ class Motor:
         for motors_input in self.inputs:
             motors_input.off()
 
-    def to(self, *, position):
+    def set_state(self, *, position):
         for motor_input, value in zip(self.inputs, position):
             if value == 0:
                 motor_input.on()
@@ -70,7 +70,7 @@ class Motor:
         self.current_position += step
         self.current_position %= len(self.move_sequence)
 
-        self.to(position=self.move_sequence[self.current_position])
+        self.set_state(position=self.move_sequence[self.current_position])
 
 
 class DefaultLeftMotor(Motor):
@@ -89,7 +89,7 @@ class CombinedMotors:
         self.right = right if right is not None else DefaultRightMotor()
         self.delay = delay
 
-    def go(self, *, steps, speed_multiplier=1, time_multiplier=1):
+    def run(self, *, steps, speed_multiplier=1, time_multiplier=1):
         sleep_time = time_multiplier * self.delay
 
         for left_step, right_step in steps:
@@ -164,11 +164,11 @@ class PenController:
         self.pen_up()
         self.absolute_line_mm(goal_position_mm=(0, 0))
 
-    def mm_to_steps(self, n):
-        return int(n * self.mm_to_steps_scale)
+    def mm_to_steps(self, millimeters):
+        return int(millimeters * self.mm_to_steps_scale)
 
-    def steps_to_mm(self, n):
-        return n / self.mm_to_steps_scale
+    def steps_to_mm(self, steps):
+        return steps / self.mm_to_steps_scale
 
     def strings_to_position_mm(self, *, strings_len_mm):
         # We calculate a height of a triangle using its area
@@ -270,7 +270,7 @@ class PenController:
         )
 
     def execute_steps(self, *, steps):
-        self.motors.go(
+        self.motors.run(
             steps=steps,
             speed_multiplier=self.speed_multiplier,
             time_multiplier=self.time_multiplier,
