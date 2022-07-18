@@ -252,15 +252,20 @@ class PenController:  # pylint: disable=too-many-instance-attributes
         )
 
         step_signs = tuple(
-            map(lambda x: int(math.copysign(1, x)), strings_len_difference_steps))
-        strings_len_difference_steps = tuple(
-            map(abs, strings_len_difference_steps))
+            map(lambda x: int(math.copysign(1, x)), strings_len_difference_steps)
+        )
+        strings_len_difference_steps = tuple(map(abs, strings_len_difference_steps))
         number_of_steps = max(*strings_len_difference_steps)
 
         steps = [[0 for _ in step_signs] for _ in range(number_of_steps)]
-        for i, (sign, step_size) in enumerate(zip(step_signs, strings_len_difference_steps)):
+        for i, (sign, step_size) in enumerate(
+            zip(step_signs, strings_len_difference_steps)
+        ):
             for step_number in range(0, step_size):
-                steps[step_number * number_of_steps // step_size + (number_of_steps // (2 * step_size))][i] += sign
+                steps[
+                    step_number * number_of_steps // step_size
+                    + (number_of_steps // (2 * step_size))
+                ][i] += sign
 
         self.execute_steps(steps=steps)
 
@@ -272,7 +277,8 @@ class PenController:  # pylint: disable=too-many-instance-attributes
         self.motors.run(
             steps=steps,
             speed_multiplier=self.speed_multiplier,
-            time_multiplier=self.time_multiplier)
+            time_multiplier=self.time_multiplier,
+        )
         time.sleep(self.motors.delay * 5)
 
     def set_current_position(self, *, strings_len_mm=None, position_mm=None):
