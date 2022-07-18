@@ -1,6 +1,6 @@
 def parse(file_name):
     # Read lines
-    with open(file_name, "r") as gcode_file:
+    with open(file_name, "r", encoding="utf-8") as gcode_file:
         lines = gcode_file.read().splitlines()
 
     # Remove comments
@@ -35,7 +35,8 @@ def parse(file_name):
                     new_command[param[0]] = float(param[1:])
                 else:
                     raise RuntimeError(
-                        f"Unsupported parameter {param} to command {line[0]}")
+                        f"Unsupported parameter {param} to command {line[0]}"
+                    )
             if "command" in new_command:
                 commands.append(new_command)
         elif line[0] in ["G91"]:
@@ -49,7 +50,6 @@ def parse(file_name):
             # Do nothing - auto home
             pass
         else:
-            raise RuntimeError(
-                f"Unknown Command {line[0]} with params {line[1:]}")
+            raise RuntimeError(f"Unknown Command {line[0]} with params {line[1:]}")
 
     return commands

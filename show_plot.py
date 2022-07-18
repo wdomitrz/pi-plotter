@@ -1,5 +1,6 @@
-import gcode_parser
 import matplotlib.pyplot as plt
+
+import gcode_parser
 
 
 def scatter(xs, ys):
@@ -21,8 +22,10 @@ def main():
             ys = [ys[-1]]
         elif command["command"] in ["absolute_move", "relative_move"]:
 
-            pos_mm = (command["X"] if "X" in command else 0,
-                      command["Y"] if "Y" in command else 0)
+            pos_mm = (
+                command["X"] if "X" in command else 0,
+                command["Y"] if "Y" in command else 0,
+            )
             if command["command"] == "absolute_move":
                 xs.append(pos_mm[0])
                 ys.append(pos_mm[1])
@@ -31,7 +34,8 @@ def main():
                 ys.append(pos_mm[1] + ys[-1])
         else:
             raise RuntimeError(
-                f"Unknown command {command['command']} with params {command}")
+                f"Unknown command {command['command']} with params {command}"
+            )
     scatter(xs, ys)
     plt.show()
 
