@@ -271,8 +271,8 @@ class PenController:  # pylint: disable=too-many-instance-attributes
     def execute_steps(self, *, steps):
         self.motors.run(
             steps=steps,
-            speed_mult=self.speed_mult,
-            time_mult=self.time_mult)
+            speed_multiplier=self.speed_multiplier,
+            time_multiplier=self.time_multiplier)
         time.sleep(self.motors.delay * 5)
 
     def set_current_position(self, *, strings_len_mm=None, position_mm=None):
@@ -295,7 +295,7 @@ class PenController:  # pylint: disable=too-many-instance-attributes
         return self.absolute_line_mm(goal_position_mm=position_mm)
 
     def pen_down(self):
-        self.pen_up_down.down()
+        self.pen_up_down.pen_down()
 
     def pen_up(self):
-        self.pen_up_down.up()
+        self.pen_up_down.pen_up()
